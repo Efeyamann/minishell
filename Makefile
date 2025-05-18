@@ -4,15 +4,7 @@ LIBFT = $(LIBFT_DIR)/libft.a
 
 SRCS = main.c \
 	parse/read_line.c \
-	parse/tokenize.c \
-	builtins/utils.c \
-	builtins/cd.c \
-	builtins/echo.c \
-	builtins/env.c \
-	builtins/exit.c \
-	builtins/export.c \
-	builtins/pwd.c \
-	builtins/unset.c
+	parse/tokenize.c
 
 OBJS = $(SRCS:.c=.o)
 

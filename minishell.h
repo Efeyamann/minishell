@@ -33,7 +33,7 @@ typedef struct s_redirection
 	struct s_redirection	*next;
 }	t_redirection;
 
-typedef struct	s_cmd
+typedef struct s_cmd
 {
 	char			*cmd;
 	char			**args;

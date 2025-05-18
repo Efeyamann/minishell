@@ -10,4 +10,8 @@ void	print_location(void)
 		perror("minishell: pwd error");
 		return (1);
 	}
+	else
+	{
+		printf("%s", path);
+	}
 }
