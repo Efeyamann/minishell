@@ -37,6 +37,13 @@ int	main(int argc, char **argv, char **envp)
 			exit_program(commands);
 		if (ft_strcmp(commands->args[0], "pwd") == 0)
 			print_location();
+		if (ft_strcmp(commands->args[0], "export") == 0 && commands->args[1] == NULL)
+			export_env(&envlist, envp, 1);
+		if (ft_strcmp(commands->args[0], "export") == 0 && commands->args[1])
+		{
+			export_env(&envlist, envp, 0);
+			export_new(commands, &envlist);
+		}
 		free_tokens(tokens);
 		free_commands(commands);
 		add_history(input);

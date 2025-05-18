@@ -37,3 +37,14 @@ int	is_numeric(char *str)
 	}
 	return (1);
 }
+
+t_envlist	*find_node(t_envlist *list, char *key)
+{
+	while (list)
+	{
+		if (strcmp(list->key, key) == 0)
+			return (list);
+		list = list->next;
+	}
+	return (NULL);
+}
