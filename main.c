@@ -2,12 +2,15 @@
 
 void	signal_handler(int sig);
 
-int	main(void)
+int	main(int argc, char **argv, char **envp)
 {
-	char	*input;
-//	t_cmd	*command;
-	char 	**sep;
+	char		*input;
+	t_token		*tokens;
+	t_cmd		*commands;
+	t_envlist	*envlist;
 
+	(void)argv;
+	(void)argc;
 	signal(SIGINT, signal_handler);
 	signal(SIGQUIT, SIG_IGN);
 	while (1)
@@ -19,28 +22,27 @@ int	main(void)
 			break ;
 		}
 		else if (!(*input))
+		{
+			free(input);
 			continue ;
+		}
+		tokens = tokenize(input);
+		commands = parse_commands(tokens);
+		//execute
+		if (ft_strcmp(commands->args[0], "echo") == 0)
+			write_line(commands);
+		if (ft_strcmp(commands->args[0], "env") == 0)
+			environment(&envlist, envp);
+		if (ft_strcmp(commands->args[0], "exit") == 0)
+			exit_program(commands);
+		if (ft_strcmp(commands->args[0], "pwd") == 0)
+			print_location();
+		free_tokens(tokens);
+		free_commands(commands);
 		add_history(input);
-//		command = token_separate(input);
-		sep = token_separate(input);
-
-		for (int i = 0; sep[i] ;i++)
-			printf("%s\n", sep[i]);
-
-	
 		free(input);
 	}
 	return (0);
-}
-
-void	builtins(t_cmd *command, char *envp[])
-{
-	if (ft_strcmp(command->args[0], "echo") == 0)
-		write_line(command);
-	else if (ft_strcmp(command->args[0], "pwd") == 0)
-		print_location(command);
-	else if (ft_strcmp(command->args[0], "env") == 0)
-		environment(&env_list, envp);
 }
 
 void	signal_handler(int sig)
