@@ -28,7 +28,7 @@ t_redirection	*create_redirection(void)
 	return (redir);
 }
 
-t_token	*handle_redirections(t_token *token, t_cmd *cmd)
+static t_token	*handle_redirections(t_token *token, t_cmd *cmd)
 {
 	t_redirection	*redir;
 	t_redirection	*tmp;
@@ -40,13 +40,13 @@ t_token	*handle_redirections(t_token *token, t_cmd *cmd)
 		&& token->next != NULL && token->next->type == T_WORD)
 	{
 		token = token->next;
-		redir->infile = strdup(token->str);
+		redir->infile = ft_strdup(token->str);
 	}
 	else if ((token->type == T_REDIR_OUT || token->type == T_APPEND)
 		&& token->next != NULL && token->next->type == T_WORD)
 	{
 		token = token->next;
-		redir->outfile = strdup(token->str);
+		redir->outfile = ft_strdup(token->str);
 		redir->append = (token->type == T_APPEND);
 	}
 	if (cmd->redirections == NULL)
@@ -61,7 +61,7 @@ t_token	*handle_redirections(t_token *token, t_cmd *cmd)
 	return (token->next);
 }
 
-int	count_args(t_token *token)
+static int	count_t_token(t_token *token)
 {
 	int	count;
 
@@ -74,25 +74,25 @@ int	count_args(t_token *token)
 	return (count);
 }
 
-t_token	*parse_simple_cmd(t_token *token, t_cmd *cmd)
+static t_token	*parse_simple_cmd(t_token *token, t_cmd *cmd)
 {
 	int		i;
 	int		arg_count;
 
-	arg_count = count_args(token);
+	arg_count = count_t_token(token);
 	cmd->args = malloc(sizeof(char *) * (arg_count + 1));
 	if (cmd->args == NULL)
 		return (NULL);
 	i = 0;
 	while (i < arg_count)
 	{
-		cmd->args[i] = strdup(token->str);
+		cmd->args[i] = ft_strdup(token->str);
 		token = token->next;
 		i++;
 	}
 	cmd->args[i] = NULL;
 	if (arg_count > 0)
-		cmd->cmd = strdup(cmd->args[0]);
+		cmd->cmd = ft_strdup(cmd->args[0]);
 	return (token);
 }
 

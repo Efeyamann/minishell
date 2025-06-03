@@ -1,48 +1,45 @@
 #include "../minishell.h"
 
+int	is_n_flag(char *arg)
+{
+	int	i;
+
+	if (!arg || arg[0] != '-' || arg[1] != 'n')
+		return (0);
+	i = 2;
+	while (arg[i])
+	{
+		if (arg[i] != 'n')
+			return (0);
+		i++;
+	}
+	return (1);
+}
+
 void	write_line(t_cmd *command)
 {
-	char	*cmd;
-	char	*nl;
-	int		i;
+	int	i;
+	int	newline;
 
-	cmd = "echo";
-	nl = "-n";
-	if (command->args[0] && command->args[1]
-		&& ft_strcmp(command->args[0], cmd) == 0
-		&& ft_strcmp(command->args[1], nl) == 0)
+	if (!command->args[0])
+		return ;
+	if (ft_strcmp(command->args[0], "echo") != 0)
+		return ;
+
+	i = 1;
+	newline = 1;
+	while (command->args[i] && is_n_flag(command->args[i]))
 	{
-		i = 2;
-		while (command->args[i])
-		{
-			if (command->args[i + 1] == NULL)
-			{
-				printf("%s", command->args[i]);
-				i++;
-			}
-			else
-			{
-				printf("%s ", command->args[i]);
-				i++;
-			}
-		}
+		newline = 0;
+		i++;
 	}
-	else if (ft_strcmp(command->args[0], cmd) == 0)
+	while (command->args[i])
 	{
-		i = 1;
-		while (command->args[i])
-		{
-			if (command->args[i + 1] == NULL)
-			{
-				printf("%s", command->args[i]);
-				i++;
-			}
-			else
-			{
-				printf("%s ", command->args[i]);
-				i++;
-			}
-		}
+		printf("%s", command->args[i]);
+		if (command->args[i + 1])
+			printf(" ");
+		i++;
+	}
+	if (newline)
 		printf("\n");
-	}
 }

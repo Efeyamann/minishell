@@ -1,86 +1,124 @@
 #include "../minishell.h"
 
-t_envlist	*export_create_env_node(char *env_string);
-void	export_add_node(t_envlist **list, t_envlist *new_node);
-int	export_print_env(t_envlist *node);
+static void	add_or_update_env(t_envlist *env, t_envlist *node);
+static void	sort_envlist(t_envlist *list);
+static void	swap_env_content(t_envlist *a, t_envlist *b);
 
-void	export_env(t_envlist **list, char *envp[], int a)
-{
-	t_envlist	*new_node;
-	int			i;
-
-	if (!list)
-		return ;
-	*list = NULL;
-	i = 0;
-	while (envp[i])
-	{
-		new_node = export_create_env_node(envp[i]);
-		if (!new_node)
-			return ;
-		export_add_node(list, new_node);
-		i++;
-	}
-	if (a == 1)
-		sort_env_and_print(*list);
-}
-
-t_envlist	*export_create_env_node(char *env_string)
+void	ft_export(t_envlist *env, char **arg)
 {
 	t_envlist	*node;
-	char		*key;
-	char		*value;
-	int			i;
+	t_envlist	*next;
 
-	i = 0;
-	while (env_string[i] != '=')
-		i++;
-	key = ft_strndup(env_string, i);
-	if (env_string[i] == '=')
-		value = ft_strdup(env_string + i + 1);
-	else
-		value = NULL;
-	node = malloc(sizeof(t_envlist));
-	if (!node)
-		return (NULL);
-	node->key = key;
-	node->value = value;
-	node->next = NULL;
-	return (node);
-}
-
-void	export_add_node(t_envlist **list, t_envlist *new_node)
-{
-	t_envlist	*current;
-
-	if (!list || !new_node)
-		return ;
-	if (*list == NULL)
+	if (!arg[1])
 	{
-		*list = new_node;
+		sort_envlist(env);
+		print_export_format(env);
 		return ;
 	}
-	current = *list;
-	while (current->next != NULL)
-		current = current->next;
-	current->next = new_node;
-}
-
-int	export_print_env(t_envlist *node)
-{
+	node = envp_init(arg + 1);
+	if (!node)
+		return ;
 	while (node)
 	{
-		printf("declare -x ");
-		printf("%s", node->key);
-		if (node->value)
-		{
-			printf("=");
-			printf("\"");
-			printf("%s", node->value);
-			printf("\"");
-		}
-		printf("\n");
-		node = node->next;
+		next = node->next;
+		add_or_update_env(env, node);
+		node = next;
 	}
-	return (0);
+	sort_envlist(env);
+}
+
+static t_envlist	*create_new_env_node(t_envlist *node)
+{
+	t_envlist	*new;
+
+	new = malloc(sizeof(t_envlist));
+	if (!new)
+		return (NULL);
+	new->key = ft_strdup(node->key);
+	if (!new->key)
+	{
+		free(new);
+		return (NULL);
+	}
+	if (node->value)
+	{
+		new->value = ft_strdup(node->value);
+		if (!new->value)
+		{
+			free(new->key);
+			free(new);
+			return (NULL);
+		}
+	}
+	else
+		new->value = NULL;
+	new->next = NULL;
+	return (new);
+}
+
+static void	add_or_update_env(t_envlist *env, t_envlist *node)
+{
+	t_envlist	*curr;
+	t_envlist	*new;
+
+	curr = env;
+	while (curr)
+	{
+		if (ft_strcmp(curr->key, node->key) == 0)
+		{
+			if (curr->value)
+				free(curr->value);
+			if (node->value)
+				curr->value = ft_strdup(node->value);
+			else
+				curr->value = NULL;
+			return ;
+		}
+		if (!curr->next)
+			break ;
+		curr = curr->next;
+	}
+	new = create_new_env_node(node);
+	if (!new)
+		return ;
+	curr->next = new;
+}
+
+
+static void	swap_env_content(t_envlist *a, t_envlist *b)
+{
+	char	*tmp_key;
+	char	*tmp_value;
+
+	tmp_key = a->key;
+	tmp_value = a->value;
+	a->key = b->key;
+	a->value = b->value;
+	b->key = tmp_key;
+	b->value = tmp_value;
+}
+
+static void	sort_envlist(t_envlist *list)
+{
+	t_envlist	*curr;
+	t_envlist	*end;
+	int			sorted;
+
+	end = NULL;
+	sorted = 0;
+	while (!sorted)
+	{
+		sorted = 1;
+		curr = list;
+		while (curr && curr->next != end)
+		{
+			if (ft_strcmp(curr->key, curr->next->key) > 0)
+			{
+				swap_env_content(curr, curr->next);
+				sorted = 0;
+			}
+			curr = curr->next;
+		}
+		end = curr;
+	}
 }

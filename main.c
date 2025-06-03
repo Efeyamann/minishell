@@ -2,17 +2,16 @@
 
 void	signal_handler(int sig);
 
-int	main(int argc, char **argv, char **envp)
+int	main()
 {
 	char		*input;
 	t_token		*tokens;
 	t_cmd		*commands;
-	t_envlist	*envlist;
+	t_envlist	*env;
 
-	(void)argv;
-	(void)argc;
 	signal(SIGINT, signal_handler);
 	signal(SIGQUIT, SIG_IGN);
+	env = envp_init(environ);
 	while (1)
 	{
 		input = read_multiline_input();
@@ -28,22 +27,7 @@ int	main(int argc, char **argv, char **envp)
 		}
 		tokens = tokenize(input);
 		commands = parse_commands(tokens);
-		//execute
-		if (ft_strcmp(commands->args[0], "echo") == 0)
-			write_line(commands);
-		if (ft_strcmp(commands->args[0], "env") == 0)
-			environment(&envlist, envp);
-		if (ft_strcmp(commands->args[0], "exit") == 0)
-			exit_program(commands);
-		if (ft_strcmp(commands->args[0], "pwd") == 0)
-			print_location();
-		if (ft_strcmp(commands->args[0], "export") == 0 && commands->args[1] == NULL)
-			export_env(&envlist, envp, 1);
-		if (ft_strcmp(commands->args[0], "export") == 0 && commands->args[1])
-		{
-			export_env(&envlist, envp, 0);
-			export_new(commands, &envlist);
-		}
+		ft_execute(env, commands);
 		free_tokens(tokens);
 		free_commands(commands);
 		add_history(input);
