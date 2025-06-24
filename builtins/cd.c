@@ -1,9 +1,32 @@
 #include "../minishell.h"
 
-static int	update_pwd_vars(char *oldpwd);
-static char	*resolve_cd_target(char **args);
+char	*get_env_value(t_envlist *env, const char *key)
+{
+	while (env)
+	{
+		if (ft_strcmp(env->key, key) == 0)
+			return (env->value);
+		env = env->next;
+	}
+	return (NULL);
+}
 
-int	builtin_cd(char **args)
+void	update_env_value(t_envlist *env, const char *key, const char *value)
+{
+	while (env)
+	{
+		if (ft_strcmp(env->key, key) == 0)
+		{
+			free(env->value);
+			env->value = ft_strdup(value);
+			return;
+		}
+		env = env->next;
+	}
+}
+
+
+int	builtin_cd(char **args, t_envlist *env)
 {
 	char	cwd[1024];
 	char	*oldpwd;
@@ -17,20 +40,38 @@ int	builtin_cd(char **args)
 	oldpwd = ft_strdup(cwd);
 	if (!oldpwd)
 		return (1);
-	target = resolve_cd_target(args);
-	if (!target || chdir(target) != 0)
+
+	if (!args[1] || ft_strcmp(args[1], "~") == 0)
 	{
-		if (target)
+		target = get_env_value(env, "HOME");
+		if (!target)
+		{
+			write(2, "minishell: cd: HOME not set\n", 29);
+			free(oldpwd);
+			return (1);
+		}
+	}
+	else if (ft_strcmp(args[1], "-") == 0)
+	{
+		target = get_env_value(env, "OLDPWD");
+		if (!target)
+		{
+			write(2, "minishell: cd: OLDPWD not set\n", 30);
+			free(oldpwd);
+			return (1);
+		}
+		printf("%s\n", target);
+	}
+	else
+		target = args[1];
+
+	if (chdir(target) != 0)
+	{
+		if (ft_strcmp(args[1], "") != 0)
 			perror("minishell: cd");
 		free(oldpwd);
 		return (1);
 	}
-	return (update_pwd_vars(oldpwd));
-}
-
-static int	update_pwd_vars(char *oldpwd)
-{
-	char	cwd[1024];
 
 	if (!getcwd(cwd, sizeof(cwd)))
 	{
@@ -38,31 +79,8 @@ static int	update_pwd_vars(char *oldpwd)
 		free(oldpwd);
 		return (1);
 	}
-	setenv("OLDPWD", oldpwd, 1);
-	setenv("PWD", cwd, 1);
+	update_env_value(env, "OLDPWD", oldpwd);
+	update_env_value(env, "PWD", cwd);
 	free(oldpwd);
 	return (0);
-}
-
-static char	*resolve_cd_target(char **args)
-{
-	char	*target;
-
-	if (!args[1] || ft_strcmp(args[1], "") == 0 || ft_strcmp(args[1], "~") == 0)
-	{
-		target = getenv("HOME");
-		if (!target)
-			write(2, "minishell: cd: HOME not set\n", 29);
-	}
-	else if (ft_strcmp(args[1], "-") == 0)
-	{
-		target = getenv("OLDPWD");
-		if (target)
-			printf("%s\n", target);
-		else
-			write(2, "minishell: cd: OLDPWD not set\n", 30);
-	}
-	else
-		target = args[1];
-	return (target);
 }

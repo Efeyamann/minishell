@@ -1,45 +1,45 @@
 #include "../minishell.h"
 
-int	is_n_flag(char *arg)
-{
-	int	i;
-
-	if (!arg || arg[0] != '-' || arg[1] != 'n')
-		return (0);
-	i = 2;
-	while (arg[i])
-	{
-		if (arg[i] != 'n')
-			return (0);
-		i++;
-	}
-	return (1);
-}
+static int	delete_new_line(t_cmd *command);
 
 void	write_line(t_cmd *command)
 {
-	int	i;
-	int	newline;
+	int		i;
+	int		temp;
 
-	if (!command->args[0])
-		return ;
-	if (ft_strcmp(command->args[0], "echo") != 0)
-		return ;
-
-	i = 1;
-	newline = 1;
-	while (command->args[i] && is_n_flag(command->args[i]))
-	{
-		newline = 0;
-		i++;
-	}
+	i = delete_new_line(command);
+	temp = i;
 	while (command->args[i])
 	{
 		printf("%s", command->args[i]);
-		if (command->args[i + 1])
+		if (command->args[i + 1] != NULL)
 			printf(" ");
 		i++;
 	}
-	if (newline)
+	if (temp == 1)
 		printf("\n");
+}
+
+static int	delete_new_line(t_cmd *command)
+{
+	char	*nl;
+	int		i;
+	int		j;
+
+	nl = "-n";
+	i = 1;
+	j = 2;
+	while (command->args[i]
+		&& strncmp(command->args[i], nl, 2) == 0)
+	{
+		j = 2;
+		while (command->args[i][j])
+		{
+			if ((strncmp(command->args[i] +j, "n", 1) != 0))
+				return (i);
+			j++;
+		}
+		i++;
+	}
+	return (i);
 }

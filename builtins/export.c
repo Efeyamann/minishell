@@ -1,8 +1,6 @@
 #include "../minishell.h"
 
 static void	add_or_update_env(t_envlist *env, t_envlist *node);
-static void	sort_envlist(t_envlist *list);
-static void	swap_env_content(t_envlist *a, t_envlist *b);
 
 void	ft_export(t_envlist *env, char **arg)
 {
@@ -72,6 +70,7 @@ static void	add_or_update_env(t_envlist *env, t_envlist *node)
 				curr->value = ft_strdup(node->value);
 			else
 				curr->value = NULL;
+			curr->eq = node->eq;
 			return ;
 		}
 		if (!curr->next)
@@ -84,41 +83,3 @@ static void	add_or_update_env(t_envlist *env, t_envlist *node)
 	curr->next = new;
 }
 
-
-static void	swap_env_content(t_envlist *a, t_envlist *b)
-{
-	char	*tmp_key;
-	char	*tmp_value;
-
-	tmp_key = a->key;
-	tmp_value = a->value;
-	a->key = b->key;
-	a->value = b->value;
-	b->key = tmp_key;
-	b->value = tmp_value;
-}
-
-static void	sort_envlist(t_envlist *list)
-{
-	t_envlist	*curr;
-	t_envlist	*end;
-	int			sorted;
-
-	end = NULL;
-	sorted = 0;
-	while (!sorted)
-	{
-		sorted = 1;
-		curr = list;
-		while (curr && curr->next != end)
-		{
-			if (ft_strcmp(curr->key, curr->next->key) > 0)
-			{
-				swap_env_content(curr, curr->next);
-				sorted = 0;
-			}
-			curr = curr->next;
-		}
-		end = curr;
-	}
-}
