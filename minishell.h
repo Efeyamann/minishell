@@ -19,6 +19,7 @@
 # include "./builtins/builtins.h"
 
 extern char **environ;
+extern int	g_last_exit;
 
 typedef enum s_token_type
 {
