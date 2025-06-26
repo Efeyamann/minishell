@@ -1,7 +1,9 @@
 #include "minishell.h"
 
-void	signal_handler(int sig);
-static void	parse_execute(char *input, t_envlist *env);
+int g_last_exit = 0;
+
+void			signal_handler(int sig);
+static void		parse_execute(char *input, t_envlist *env);
 
 int	main()
 {
