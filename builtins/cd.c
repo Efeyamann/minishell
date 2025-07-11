@@ -19,12 +19,11 @@ void	update_env_value(t_envlist *env, const char *key, const char *value)
 		{
 			free(env->value);
 			env->value = ft_strdup(value);
-			return;
+			return ;
 		}
 		env = env->next;
 	}
 }
-
 
 int	builtin_cd(char **args, t_envlist *env)
 {
@@ -35,18 +34,29 @@ int	builtin_cd(char **args, t_envlist *env)
 	if (!getcwd(cwd, sizeof(cwd)))
 	{
 		perror("minishell: cd: getcwd");
+		g_last_exit = 1;
 		return (1);
 	}
 	oldpwd = ft_strdup(cwd);
 	if (!oldpwd)
+	{
+		g_last_exit = 1;
 		return (1);
-
+	}
+	if (args[1] && args[2])
+	{
+		write(2, "minishell: cd: too many arguments\n", 34);
+		g_last_exit = 1;
+		free(oldpwd);
+		return (1);
+	}
 	if (!args[1] || ft_strcmp(args[1], "~") == 0)
 	{
 		target = get_env_value(env, "HOME");
 		if (!target)
 		{
 			write(2, "minishell: cd: HOME not set\n", 29);
+			g_last_exit = 1;
 			free(oldpwd);
 			return (1);
 		}
@@ -57,6 +67,7 @@ int	builtin_cd(char **args, t_envlist *env)
 		if (!target)
 		{
 			write(2, "minishell: cd: OLDPWD not set\n", 30);
+			g_last_exit = 1;
 			free(oldpwd);
 			return (1);
 		}
@@ -64,18 +75,20 @@ int	builtin_cd(char **args, t_envlist *env)
 	}
 	else
 		target = args[1];
-
 	if (chdir(target) != 0)
 	{
 		if (ft_strcmp(args[1], "") != 0)
+		{
 			perror("minishell: cd");
+			g_last_exit = 1;
+		}
 		free(oldpwd);
 		return (1);
 	}
-
 	if (!getcwd(cwd, sizeof(cwd)))
 	{
 		perror("minishell: cd: getcwd after chdir");
+		g_last_exit = 1;
 		free(oldpwd);
 		return (1);
 	}
