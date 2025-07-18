@@ -1,7 +1,12 @@
 #include "../minishell.h"
 
+<<<<<<< HEAD
 static void	sort_envlist(t_envlist *list);
 static void	print_export_format(t_envlist *list);
+=======
+static void	add_or_update_env(t_envlist *env, t_envlist *node);
+static int	is_valid_identifier(const char *str);
+>>>>>>> c6c9aae7735f0c9e87735e08ea11841bd18a0876
 
 void	builtin_export(t_envlist *env, char **arg)
 {
@@ -19,9 +24,23 @@ void	builtin_export(t_envlist *env, char **arg)
 	}
 	while (arg[i])
 	{
+<<<<<<< HEAD
 		if (handle_single_export_arg(env, arg[i]))
 			has_error = 1;
 		i++;
+=======
+		next = node->next;
+		if (!is_valid_identifier(node->key))
+		{
+			write(2, "export: `", 9);
+			write(2, node->key, ft_strlen(node->key));
+			write(2, "`: not a valid identifier\n", 26);
+			g_last_exit = 1;
+		}
+		else
+			add_or_update_env(env, node);
+		node = next;
+>>>>>>> c6c9aae7735f0c9e87735e08ea11841bd18a0876
 	}
 	if (has_error)
 		g_last_exit = 1;
@@ -79,3 +98,22 @@ static void	sort_envlist(t_envlist *list)
 		end = curr;
 	}
 }
+<<<<<<< HEAD
+=======
+
+static int	is_valid_identifier(const char *str)
+{
+	int	i;
+
+	if (!str || (!ft_isalpha(str[0]) && str[0] != '_'))
+		return (0);
+	i = 1;
+	while (str[i] && str[i] != '=')
+	{
+		if (!ft_isalnum(str[i]) && str[i] != '_')
+			return (0);
+		i++;
+	}
+	return (1);
+}
+>>>>>>> c6c9aae7735f0c9e87735e08ea11841bd18a0876
