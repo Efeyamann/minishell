@@ -1,35 +1,63 @@
 #include "../minishell.h"
 
-static void	print_display(void)
+static int	is_valid_exit_arg(const char *str)
 {
-	write(2, "exit\n", 5);
-	write(2, "minishell: exit: too many arguments\n", 36);
+	int	i;
+
+	i = 0;
+	if (!str || !*str)
+		return (0);
+	if (str[i] == '+' || str[i] == '-')
+		i++;
+	if (str[i] == '\0')
+		return (0);
+	while (str[i])
+	{
+		if (!ft_isdigit(str[i]))
+			return (0);
+		i++;
+	}
+	return (1);
 }
 
-void	exit_program(t_cmd *commands)
+static int	get_exit_status(char *arg)
+{
+	int	status;
+
+	if (is_valid_exit_arg(arg) == 0)
+	{
+		write(2, "minishell: exit: ", 17);
+		write(2, arg, ft_strlen(arg));
+		write(2, ": numeric argument required\n", 28);
+		status = 2;
+	}
+	else
+	{
+		status = ft_atoi(arg);
+		status = (unsigned char)status;
+	}
+	return (status);
+}
+
+void	builtin_exit(t_cmd *commands, int is_child)
 {
 	int	status;
 	int	argc;
 
 	argc = 0;
-	while (commands->args[argc])
+	while (commands->args && commands->args[argc])
 		argc++;
-	printf("%d\n", argc);
+	if (!is_child)
+		write(2, "exit\n", 5);
 	if (argc > 2)
-		print_display();
-	else
 	{
-		if (is_numeric(commands->args[1]) == 0)
-		{
-			write(2, "exit\n", 5);
-			write(2, "minishell: exit: numeric argument required\n", 43);
-		}
-		else
-		{
-			status = ft_atoi(commands->args[1]);
-			if (status < 0 || status > 255)
-				status = status % 256;
-			exit (status);
-		}
+		write(2, "minishell: exit: too many arguments\n", 36);
+		g_last_exit = 1;
+		return ;
 	}
+	if (argc == 1)
+		status = g_last_exit;
+	else
+		status = get_exit_status(commands->args[1]);
+	exit(status);
 }

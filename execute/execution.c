@@ -1,104 +1,59 @@
 #include "./../minishell.h"
 
-static void	execute_builtin(t_cmd *cmd, t_envlist *env);
-
-void	execute_external_command(t_cmd *cmd, t_envlist *env)
+static int	list_len(t_cmd	*list)
 {
-	char	*path;
-	char	**envp;
+	int	i;
 
-	path = get_exec_path(cmd->cmd);
-	if (!path)
+	i = 0;
+	while (list)
 	{
-		write(2, "minishell: command not found: ", 30);
-		write(2, cmd->cmd, ft_strlen(cmd->cmd));
-		write(2, "\n", 1);
-		exit(127);
+		i++;
+		list = list->next;
 	}
-	envp = envlist_to_array(env);
-	if (execve(path, cmd->args, envp) == -1)
-	{
-		perror("minishell");
-		free(path);
-		ft_free_split(envp);
-		exit(126);
-	}
+	return (i);
+}
+
+void	execute_builtin(t_cmd *cmd, t_envlist *env, int is_child)
+{
+	if (!cmd || !cmd->cmd)
+		return ;
+	if (ft_strcmp(cmd->cmd, "echo") == 0)
+		builtin_echo(cmd);
+	else if (ft_strcmp(cmd->cmd, "env") == 0)
+		builtin_env(env);
+	else if (ft_strcmp(cmd->cmd, "exit") == 0)
+		builtin_exit(cmd, is_child);
+	else if (ft_strcmp(cmd->cmd, "pwd") == 0)
+		builtin_pwd();
+	else if (ft_strcmp(cmd->cmd, "cd") == 0)
+		builtin_cd(cmd->args, env);
+	else if (ft_strcmp(cmd->cmd, "unset") == 0)
+		builtin_unset(env, cmd->args);
+	else if (ft_strcmp(cmd->cmd, "export") == 0)
+		builtin_export(env, cmd->args);
+}
+
+static int	should_run_parent_builtin(t_cmd *cmd)
+{
+	if (!cmd || !cmd->cmd || cmd->redirections)
+		return (0);
+	if (ft_strcmp(cmd->cmd, "cd") == 0
+		|| ft_strcmp(cmd->cmd, "export") == 0
+		|| ft_strcmp(cmd->cmd, "unset") == 0
+		|| ft_strcmp(cmd->cmd, "exit") == 0)
+		return (1);
+	return (0);
 }
 
 void	ft_execute(t_envlist *env, t_cmd *cmd_list)
 {
-	int		pipe_fd[2];
-	int		in_fd;
-	pid_t	pid;
-	t_cmd	*curr;
-
-	in_fd = 0;
-	curr = cmd_list;
-	while (curr)
+	if (!cmd_list || !cmd_list->cmd)
+		return ;
+	if (list_len(cmd_list) == 1 && is_builtin(cmd_list)
+		&& should_run_parent_builtin(cmd_list))
 	{
-		if (!curr->next && is_builtin(curr) && curr == cmd_list)
-		{
-			handle_redirections_fd(curr);
-			execute_builtin(curr, env);
-		}
-		else
-		{
-			if (curr->next)
-				pipe(pipe_fd);
-			pid = fork();
-			if (pid == 0)
-			{
-				if (in_fd != 0)
-				{
-					dup2(in_fd, 0);
-					close(in_fd);
-				}
-				if (curr->next)
-				{
-					close(pipe_fd[0]);
-					dup2(pipe_fd[1], 1);
-					close(pipe_fd[1]);
-				}
-				handle_redirections_fd(curr);
-				if (is_builtin(curr))
-				{
-					handle_redirections_fd(curr);
-					execute_builtin(curr, env);
-					exit (0);
-				}
-				execute_external_command(curr, env);
-				exit (1);
-			}
-			else
-			{
-				waitpid(pid, NULL, 0);
-				if (in_fd != 0)
-					close(in_fd);
-				if (curr->next)
-				{
-					close(pipe_fd[1]);
-					in_fd = pipe_fd[0];
-				}
-			}
-		}
-		curr = curr->next;
+		execute_builtin(cmd_list, env, 0);
+		return ;
 	}
-}
-
-static void	execute_builtin(t_cmd *cmd, t_envlist *env)
-{
-	if (ft_strcmp(cmd->cmd, "echo") == 0)
-		write_line(cmd);
-	else if (ft_strcmp(cmd->cmd, "env") == 0)
-		ft_envp(env);
-	else if (ft_strcmp(cmd->cmd, "exit") == 0)
-		exit_program(cmd);
-	else if (ft_strcmp(cmd->cmd, "pwd") == 0)
-		print_location();
-	else if (ft_strcmp(cmd->cmd, "cd") == 0)
-		builtin_cd(cmd->args, env);
-	else if (ft_strcmp(cmd->cmd, "unset") == 0)
-		ft_unset(env, cmd->args);
-	else if (ft_strcmp(cmd->cmd, "export") == 0)
-		ft_export(env, cmd->args);
+	execute_pipeline(cmd_list, env);
 }
