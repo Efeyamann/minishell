@@ -86,10 +86,6 @@ void		ft_free_split(char	**arg);
 char		*ft_strjoin_three(char *s1, char *s2, char *s3);
 char		**envlist_to_array(t_envlist *env);
 char		*expand_variable(char *str, t_envlist *env);
-<<<<<<< HEAD
-=======
-void		handle_redirections_fd(t_cmd *cmd);
->>>>>>> c6c9aae7735f0c9e87735e08ea11841bd18a0876
 int			is_builtin(t_cmd *cmd);
 
 char		*get_exec_path(char *cmd);

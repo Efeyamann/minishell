@@ -52,58 +52,8 @@ void	ft_execute(t_envlist *env, t_cmd *cmd_list)
 	if (list_len(cmd_list) == 1 && is_builtin(cmd_list)
 		&& should_run_parent_builtin(cmd_list))
 	{
-<<<<<<< HEAD
 		execute_builtin(cmd_list, env, 0);
 		return ;
-=======
-		if (!curr->next && is_builtin(curr) && curr == cmd_list)
-		{
-			handle_redirections_fd(curr);
-			execute_builtin(curr, env);
-		}
-		else
-		{
-			if (curr->next)
-				pipe(pipe_fd);
-			pid = fork();
-			if (pid == 0)
-			{
-				if (in_fd != 0)
-				{
-					dup2(in_fd, 0);
-					close(in_fd);
-				}
-				if (curr->next)
-				{
-					close(pipe_fd[0]);
-					dup2(pipe_fd[1], 1);
-					close(pipe_fd[1]);
-				}
-				handle_redirections_fd(curr);
-				if (is_builtin(curr))
-				{
-					handle_redirections_fd(curr);
-					execute_builtin(curr, env);
-					exit (0);
-				}
-				execute_external_command(curr, env);
-				exit (127);
-			}
-			else
-			{
-				waitpid(pid, NULL, 0);
-				if (in_fd != 0)
-					close(in_fd);
-				if (curr->next)
-				{
-					close(pipe_fd[1]);
-					in_fd = pipe_fd[0];
-				}
-				g_last_exit = 1;
-			}
-		}
-		curr = curr->next;
->>>>>>> c6c9aae7735f0c9e87735e08ea11841bd18a0876
 	}
 	execute_pipeline(cmd_list, env);
 }

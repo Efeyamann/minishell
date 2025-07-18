@@ -4,7 +4,6 @@ LIBFT = $(LIBFT_DIR)/libft.a
 
 SRCS = main.c \
 	expand_variable.c \
-<<<<<<< HEAD
 	parse/read_line.c parse/parse.c parse/tokenize.c parse/tokenize_utils.c \
 	parse/fill_command.c parse/process_token.c parse/parse_execute.c \
 	execute/execution.c execute/execute_pipe.c \
@@ -12,12 +11,6 @@ SRCS = main.c \
 	builtins/cd.c builtins/echo.c builtins/exit.c builtins/export.c builtins/export_utils_1.c builtins/export_utils_2.c \
 	builtins/pwd.c builtins/unset.c builtins/env.c \
 	builtins/cd_utils.c \
-=======
-	parse/read_line.c parse/parse.c parse/tokenize.c \
-	execute/execution.c \
-	builtins/cd.c builtins/echo.c builtins/exit.c builtins/export.c \
-	builtins/pwd.c builtins/unset.c builtins/env.c builtins/print_export.c\
->>>>>>> c6c9aae7735f0c9e87735e08ea11841bd18a0876
 	utils/envp_init.c utils/access_path.c utils/execution_utils.c utils/utils.c utils/parse_utils.c \
 	utils/expand_utils.c free/free.c
 

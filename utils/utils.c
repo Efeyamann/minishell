@@ -18,13 +18,14 @@ char	*ft_strndup(const char *s, size_t n)
 	return (copy);
 }
 
-int	is_numeric( char *str)
+int	is_numeric(char *str)
 {
-	int i = 0;
+	int	i;
 
-	if (!str || str[0] == '\0')
+	if (!str || !str[0])
 		return (0);
-	if (str[i] == '-' || str[i] == '+')
+	i = 0;
+	if (str[0] == '+' || str[0] == '-')
 		i++;
 	if (!str[i])
 		return (0);
@@ -36,7 +37,6 @@ int	is_numeric( char *str)
 	}
 	return (1);
 }
-
 
 int	ft_strcmp(const char *s1, const char *s2)
 {
